@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from settings import publication_data_logger
+from config.settings import publication_data_logger
 
 
 def register_delivery_data(function):

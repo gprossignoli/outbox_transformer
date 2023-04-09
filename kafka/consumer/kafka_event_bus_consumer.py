@@ -17,7 +17,7 @@ class KafkaEventBusConsumer:
         ).build()
         self.__kafka_consumer.subscribe(topics=[self.__topic_name])
 
-    def consume(self):
+    def consume(self) -> EventBusMessage:
         try:
             while True:
                 msg: Message = self.__kafka_consumer.poll(timeout=1.0)
@@ -28,7 +28,12 @@ class KafkaEventBusConsumer:
                 else:
                     msg_value = json.loads(msg.value().decode("utf-8"))
                     event_data = msg_value["payload"]["after"]
-                    return EventBusMessage(event_id=event_data["event_id"], event_unique_identifier=event_data["event_unique_identifier"], created_at=event_data["created_at"], payload=event_data["payload"])
+                    return EventBusMessage(
+                        event_id=event_data["event_id"],
+                        event_unique_identifier=event_data["event_unique_identifier"],
+                        created_at=event_data["created_at"],
+                        payload=event_data["payload"],
+                    )
         except Exception as e:
             self.__logger.error(e)
             self.__kafka_consumer.close()

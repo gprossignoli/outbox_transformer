@@ -7,6 +7,11 @@ verify_ssl = true
 black = "==23.1.0"
 
 [packages]
+flask = "==2.2.2"
+flask-sqlalchemy = "==3.0.3"
+Flask-Migrate = "==4.0.4"
+psycopg2-binary = "==2.9.5"
+sqlalchemy = "==1.4.46"
 ujson = "==5.7.0"
 confluent-kafka = "==2.0.2"
 python-dotenv = "==0.21.1"

@@ -28,4 +28,6 @@ RUN if [ "$DEVELOPMENT" = "True" ]; \
         pipenv install --ignore-pipfile --deploy; \
     fi
 
-CMD ["pipenv", "run", "python", "app.py"]
+EXPOSE 8005
+
+CMD ["pipenv", "run", "flask", "run"]

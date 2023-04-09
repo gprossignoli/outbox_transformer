@@ -8,6 +8,10 @@ from message_relay.register_delivery_data import register_delivery_data
 from message_relay.register_publication_data import register_publication_data
 
 
+class NotDeliveredException(Exception):
+    pass
+
+
 class KafkaEventBusProducer:
     def __init__(self, logger: Logger):
         self.__logger = logger
@@ -57,6 +61,7 @@ class KafkaEventBusProducer:
             self.__logger.info(
                 f"ERROR: Message {msg.value().decode('utf-8')} failed delivery: {err}"
             )
+            raise NotDeliveredException()
         else:
             self.__logger.info(
                 f"Event to topic {msg.topic()}: key = {msg.key().decode('utf-8')}"

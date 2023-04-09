@@ -1,14 +1,20 @@
-from kafka.consumer.kafka_event_bus_consumer_factory import KafkaEventBusConsumerFactory
-from kafka.producer.kafka_event_bus_producer_factory import KafkaEventBusProducerFactory
-from message_relay.message_relay import MessageRelay
-from settings import logger, OUTBOX_CDC_TOPIC
+from flask import Flask
 
-if __name__ == "__main__":
-    msg_relay = MessageRelay(
-        logger=logger,
-        kafka_event_bus_consumer=KafkaEventBusConsumerFactory(
-            consumer_group_id="outbox_transformer", topic_name=OUTBOX_CDC_TOPIC
-        ).build(),
-        kafka_event_bus_producer=KafkaEventBusProducerFactory().build(),
-    )
-    msg_relay.start()
+from config.commands import register_commands
+from config.db import configure_db
+from config.settings import SECRET_KEY, db
+
+
+def create_app() -> Flask:
+    app = Flask(__name__)
+
+    with app.app_context():
+        configure_db(app, db)
+        register_commands(app)
+
+    return app
+
+
+if __name__ == '__main__':
+    app = create_app()
+    app.run(host="0.0.0.0", port=8005)

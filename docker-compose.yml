@@ -32,6 +32,40 @@ services:
       - .env
     networks:
       - kafka
+  outbox_transformer_connector:
+    build:
+      context: ./deploy/kafka/sink_connector
+      dockerfile: ./Dockerfile
+    container_name: message-relay-connector
+    ports:
+      - "8084:8083"
+    environment:
+      - CONNECT_BOOTSTRAP_SERVERS=broker_a:9092,broker_b:9092,broker_c:9092
+      - CONNECT_GROUP_ID=debezium_outbox_transformer
+      - CONNECT_CONFIG_STORAGE_TOPIC=outbox-transformer-connector-configs
+      - CONNECT_OFFSET_STORAGE_TOPIC=outbox-transformer-connector-offsets
+      - CONNECT_STATUS_STORAGE_TOPIC=outbox-transformer-connector-status
+      - CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_INTERNAL_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_REST_ADVERTISED_HOST_NAME=localhost
+      - CONNECT_PLUGIN_PATH=/usr/local/share/kafka/plugins
+    networks:
+      - kafka
+    volumes:
+      - logs:/kafka/logs
+      - config:/kafka/config
+  debezium-ui:
+    image: debezium/debezium-ui
+    ports:
+      - 8085:8080
+    environment:
+      - KAFKA_CONNECT_URIS=http://message-relay-connector:8083
+    depends_on:
+      - outbox_transformer_connector
+    networks:
+      - kafka
 
 networks:
   kafka:
@@ -40,3 +74,5 @@ networks:
 
 volumes:
   postgres_data:
+  logs:
+  config:

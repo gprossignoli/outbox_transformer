@@ -1,7 +1,6 @@
-import os
 from typing import List
 
-from settings import KAFKA_SERVERS, KAFKA_CLIENT_ID
+from config.settings import KAFKA_SERVERS, KAFKA_CLIENT_ID
 
 
 class KafkaClientConfiguration:
