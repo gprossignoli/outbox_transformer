@@ -1,0 +1,42 @@
+version: "3.8"
+services:
+  outbox_transformer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: on-failure
+    networks:
+      - kafka
+    depends_on:
+      - outbox_db
+    env_file:
+      - .env
+    volumes:
+      - ./transformer.log:/transformer.log
+      - ./transformer_errors.log:/transformer_errors.log
+      - ./publication_data.log:/publication_data.log
+  outbox_db:
+    image: postgres:11.8
+    container_name: "outbox_database"
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    command: [ "postgres", "-c", "wal_level=logical" ]
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/postgres/local_db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    env_file:
+      - .env
+    networks:
+      - kafka
+
+networks:
+  kafka:
+    external: true
+    name: kafka
+
+volumes:
+  postgres_data:
