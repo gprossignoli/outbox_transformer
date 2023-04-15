@@ -12,13 +12,18 @@ cli_commands = AppGroup(name="cli")
 
 @cli_commands.command("message-relay-worker")
 def message_relay_worker() -> None:
+    logger.info("Starting message relay worker")
     while True:
-        msg_relay = MessageRelay(
-            logger=logger,
-            outbox_repository=SqlalchemyTransactionalOutboxRepositoryWithAutocommit(db.session),
-            event_bus_producer=KafkaEventBusProducerFactory().build(),
-        )
-        msg_relay.start()
+        try:
+            msg_relay = MessageRelay(
+                logger=logger,
+                outbox_repository=SqlalchemyTransactionalOutboxRepositoryWithAutocommit(db.session),
+                event_bus_producer=KafkaEventBusProducerFactory().build(),
+            )
+            msg_relay.start()
+        except Exception as e:
+            logger.exception(f"MessageRelay suffered an error: {e}")
+            logger.info("Resetting the execution of the MessageRelay")
 
 
 def register_commands(app: Flask) -> None:
