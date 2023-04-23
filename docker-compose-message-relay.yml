@@ -1,0 +1,25 @@
+version: "3.8"
+services:
+  message-relay:
+    container_name: message-relay
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    restart: on-failure
+    networks:
+      - kafka
+    env_file:
+      - .env
+    volumes:
+      - ./transformer.log:/transformer.log
+      - ./transformer_errors.log:/transformer_errors.log
+      - ./publication_data.log:/publication_data.log
+    command: "pipenv run flask cli message-relay-worker"
+
+networks:
+  kafka:
+    external: true
+    name: kafka
+  outbox_transformer:
+    external: true
+    name: outbox_transformer

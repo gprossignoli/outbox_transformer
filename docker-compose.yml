@@ -1,6 +1,7 @@
 version: "3.8"
 services:
   outbox_transformer:
+    container_name: outbox_transformer
     build:
       context: .
       dockerfile: ./Dockerfile
@@ -24,13 +25,14 @@ services:
       - POSTGRES_DB=${DB_NAME}
     command: [ "postgres", "-c", "wal_level=logical" ]
     ports:
-      - "${DB_PORT}:5432"
+      - "54323:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./deploy/postgres/local_db/init.sql:/docker-entrypoint-initdb.d/init.sql
     env_file:
       - .env
     networks:
+      - outbox_transformer
       - kafka
   outbox_transformer_connector:
     build:
@@ -71,6 +73,8 @@ networks:
   kafka:
     external: true
     name: kafka
+  outbox_transformer:
+    name: outbox_transformer
 
 volumes:
   postgres_data:
